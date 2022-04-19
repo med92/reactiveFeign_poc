@@ -6,10 +6,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.web.bind.annotation.*;
 import reactivefeign.spring.config.EnableReactiveFeignClients;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -46,6 +48,28 @@ public class FeignApplication {
     @GetMapping("/greetingReactive")
     public Mono<String> greetingReactive() {
         return reactiveFeignClient.greeting().map(s -> "reactive feign! : " + s);
+    }
+
+    @PostMapping(value ="/uploadExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    public Flux<String> greetingReactive(@RequestPart("files") FilePart filePart) {
+
+        return reactiveFeignClient.uploadFile(filePart) ;
+
+       /* MultiValueMap<String, Object> multiValueMap = new LinkedMultiValueMap<>();
+        ByteArrayResource contentsAsResource = null;
+        try {
+            contentsAsResource = new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return file.getOriginalFilename();
+                }
+            };
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        multiValueMap.add("file", contentsAsResource);
+        return reactiveFeignClient.uploadFile(multiValueMap);*/
     }
 
     @GetMapping("/greetingReactiveWithParam")
